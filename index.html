@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: rgb(232, 240, 248);
+            position: relative;
+        }
+
+        #container {
+            width: 1200px;
+            height: 370px;
+            background-color: white;
+            border: 0.5px solid lightgray;
+            border-radius: 30px;
+            position: relative;
+        }
+
+        #in {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            margin-left: 40px;
+            margin-right: 40px;
+            margin-top: 8%;
+        }
+
+        .inputs {
+            width: 100%;
+        }
+
+        select.inputs {
+            width: 100%;
+            box-sizing: border-box;
+            height: 35px;
+            margin-top: 5px;
+            border: none;
+            font-size: 20px;
+        }
+
+        input.inputs {
+            width: 100%;
+            box-sizing: border-box;
+            height: 35px;
+            margin-top: 5px;
+            border: none;
+            font-size: 20px;
+        }
+
+        #cnt1, #cnt2 {
+            margin-left: 10px;
+        }
+
+        #amount,#cnt1,#cnt2 {
+            border: 0.5px solid lightgray;
+            height: 95px;
+            border-radius: 10px;
+            padding: 5px;
+            padding-left: 20px;
+        }
+
+        label {
+            color: gray;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        button {
+            position: absolute;
+            right: 40px;
+            margin-top: 50px;
+            height: 50px;
+            width: 200px;
+            border: none;
+            background-color: #006CE0;
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+        #top {
+            background-color: #000080;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 65%;
+            z-index: -1;
+            border-radius: 5px 5px 100px 100px;
+        }
+
+        #ans {
+            margin-top: 20px;
+            margin-left: 40px;
+        }
+
+        .from, .to {
+            font-size: 18px;
+            color: gray;
+        }
+
+        .f10 {
+            font-size: 35px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .header {
+            color: white;
+            position: absolute;
+            top: 50px;
+            height: 100px;
+            font-size: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Currency Converter</div>
+    <div id="container">
+        <div id="in">
+            <div id="amount">
+                <label for="">Amount</label>
+                <br>
+                <input type="number" name="" id="first" value="1" class="inputs" required >
+            </div>
+
+            <div id="cnt1">
+                <label for="">From</label>
+                <br>
+                <select name="" id="country1" class="inputs">
+                    <option value="0" class="inputs" id="f1">Country</option>
+                </select>
+            </div>
+
+            <div id="cnt2">
+                <label for="">To</label>
+                <br>
+                <select name="" id="country2" class="inputs">
+                    <option value="0" class="inputs" id="f2">Country</option>
+                </select>
+            </div>
+        </div>
+        <button>Convert</button>
+        <div id="ans">
+            <div class="from"></div>
+            <div class="f10"></div>
+            <div class="to"></div>
+        </div>
+    </div>
+
+    <div id="top"></div>
+
+    <script>
+        const currencyNames = [
+            'AUD Australian Dollar', 'CAD Canadian Dollar', 'CHF Swiss Franc', 'CNY Chinese Yuan',
+            'EUR Euro', 'GBP British Pound', 'INR Indian Rupee', 'JPY Japanese Yen', 'USD US Dollar',
+            'AED United Arab Emirates Dirham', 'ARS Argentine Peso', 'BRL Brazilian Real', 'CZK Czech Koruna',
+            'DKK Danish Krone', 'HKD Hong Kong Dollar', 'HUF Hungarian Forint', 'IDR Indonesian Rupiah',
+            'ILS Israeli New Shekel', 'KRW South Korean Won', 'MXN Mexican Peso', 'MYR Malaysian Ringgit',
+            'NOK Norwegian Krone', 'NZD New Zealand Dollar', 'PHP Philippine Peso', 'PLN Polish Zloty',
+            'RUB Russian Ruble', 'SAR Saudi Riyal', 'SEK Swedish Krona', 'SGD Singapore Dollar',
+            'THB Thai Baht', 'TRY Turkish Lira', 'ZAR South African Rand'
+        ];
+
+        const valuesInINR = [
+            0.018, 0.017, 0.011, 0.087, 0.011, 0.0098, 1, 1.8, 0.012, 0.044, 4.0, 0.061, 0.27, 0.083, 0.095, 4.3, 166, 0.045, 16, 0.21, 0.056, 0.13, 0.20, 0.71, 0.051, 1.2, 0.045, 0.13, 0.017, 0.42, 0.34, 0.23
+        ];
+
+        let country1 = document.getElementById("country1");
+        let country2 = document.getElementById("country2");
+
+        for (let i = 0; i < currencyNames.length; i++) {
+            let cnt1 = document.createElement('option');
+            cnt1.value = i;
+            cnt1.innerHTML = `${currencyNames[i]}`;
+            country1.appendChild(cnt1);
+
+            let cnt2 = document.createElement('option');
+            cnt2.value = i;
+            cnt2.innerHTML = `${currencyNames[i]}`;
+            country2.appendChild(cnt2);
+        }
+
+        let c1;
+        let c2;
+
+        country1.addEventListener('change', (event) => {
+            c1 = event.target.value;
+        });
+
+        country2.addEventListener('change', (event) => {
+            c2 = event.target.value;
+        });
+
+        const inp = document.querySelector('input');
+        let val = 1;
+
+        inp.addEventListener('change',(event) => {
+            val = event.target.value;
+        });
+
+        const convert = document.querySelector('button');
+
+        convert.addEventListener('click',(event) => {
+            let currency1 = valuesInINR[c1];
+            let currency2 = valuesInINR[c2];
+
+            let after_conversion = ((val / currency1) * currency2).toFixed(5);
+
+            let from = document.querySelector('.from');
+            from.innerHTML = `${val} ${currencyNames[c1]} =  `;
+
+            let f10 = document.querySelector('.f10');
+            f10.innerHTML = `${after_conversion} ${currencyNames[c2]} `;
+
+            let to = document.querySelector('.to');
+            to.innerHTML = `1 ${currencyNames[c2]} = ${valuesInINR[c1]} ${currencyNames[c1]}`;
+        });
+    </script>
+</body>
+</html>
